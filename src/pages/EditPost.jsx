@@ -192,7 +192,7 @@ export default function EditPost() {
                           role="status"
                           aria-hidden="true"
                         ></span>
-                        Creating...
+                        Updating...
                       </>
                     ) : (
                       "Update Post"

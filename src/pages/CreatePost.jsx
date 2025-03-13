@@ -153,7 +153,7 @@ export default function CreatePost() {
                           role="status"
                           aria-hidden="true"
                         ></span>
-                        Updating...
+                        Creating...
                       </>
                     ) : (
                       "Create Post"
