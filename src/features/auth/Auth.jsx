@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "./authSlice";
 import { FaGoogle, FaGithub, FaUser } from "react-icons/fa";
 
-const BACKEND_URL = "http://localhost:4000";
+const BACKEND_URL = "https://playground-029-backend.vercel.app";
 
 export default function Auth() {
   const [userData, setUserData] = useState({
