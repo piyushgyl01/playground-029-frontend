@@ -16,28 +16,39 @@ export default function OAuthCallback() {
         const params = new URLSearchParams(location.search);
         const token = params.get("token");
         const userJson = params.get("user");
+        const provider = params.get("provider"); // Get provider from URL params
 
         if (!token) {
           setError("Authentication failed. Token not received.");
           return;
         }
 
+        if (!provider) {
+          console.warn("Provider information missing, defaulting to 'unknown'");
+        }
+
         // Parse user data
         let user;
         try {
           user = userJson ? JSON.parse(decodeURIComponent(userJson)) : null;
+          
+          // Ensure provider is part of the user object
+          if (user && provider && !user.provider) {
+            user.provider = provider;
+          }
         } catch (e) {
           console.error("Error parsing user data:", e);
           setError("Error processing user data.");
           return;
         }
 
-        // Store token and user in localStorage
+        // Store token, user, and provider in localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("auth_provider", provider || "unknown");
 
         // Update Redux state
-        dispatch(oauthLoginSuccess({ token, user }));
+        dispatch(oauthLoginSuccess({ token, user, provider }));
 
         // Redirect to home page
         navigate("/");

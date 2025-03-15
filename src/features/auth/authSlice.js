@@ -37,10 +37,14 @@ export const loginUser = createAsyncThunk(
       const response = await API.post("/auth/login", userData);
       const { token, user } = response.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      // Regular login uses username/password
+      const userWithProvider = { ...user, provider: "local" };
 
-      return { token, user };
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userWithProvider));
+      localStorage.setItem("auth_provider", "local");
+
+      return { token, user: userWithProvider };
     } catch (error) {
       return rejectWithValue(
         error.response?.data || { message: "Login failed" }
@@ -57,6 +61,7 @@ export const logoutUser = createAsyncThunk(
 
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      localStorage.removeItem("auth_provider");
 
       return null;
     } catch (error) {
@@ -72,10 +77,22 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await API.get("/auth/me");
-      return response.data;
+      
+      // Preserve the provider information
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const provider = storedUser.provider || localStorage.getItem("auth_provider") || "unknown";
+      
+      const updatedUser = {
+        ...response.data,
+        provider
+      };
+      
+      return updatedUser;
     } catch (error) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      localStorage.removeItem("auth_provider");
+      
       return rejectWithValue(
         error.response?.data || { message: "Failed to get the current user" }
       );
@@ -92,6 +109,7 @@ export const authSlice = createSlice({
     status: "idle",
     error: null,
     isAuthenticated: !!localStorage.getItem("token"),
+    provider: localStorage.getItem("auth_provider") || null,
   },
   reducers: {
     clearError: (state) => {
@@ -102,6 +120,7 @@ export const authSlice = createSlice({
       state.isAuthenticated = true;
       state.status = "succeeded";
       state.error = null;
+      state.provider = action.payload.provider;
     }
   },
   extraReducers: (builder) => {
@@ -128,6 +147,7 @@ export const authSlice = createSlice({
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.error = null;
+        state.provider = action.payload.user.provider || "local";
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
@@ -140,6 +160,7 @@ export const authSlice = createSlice({
         state.isAuthenticated = false;
         state.status = "idle";
         state.error = null;
+        state.provider = null;
       })
 
       .addCase(getCurrentUser.pending, (state) => {
@@ -149,12 +170,14 @@ export const authSlice = createSlice({
         state.user = action.payload;
         state.isAuthenticated = true;
         state.status = "succeeded";
+        state.provider = action.payload.provider;
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.user = null;
         state.isAuthenticated = false;
         state.status = "failed";
         state.error = action.payload?.message || "Failed to get user";
+        state.provider = null;
       });
   },
 });

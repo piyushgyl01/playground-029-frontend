@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "./authSlice";
-import { FaGoogle, FaGithub } from "react-icons/fa";
+import { FaGoogle, FaGithub, FaUser } from "react-icons/fa";
 
 const BACKEND_URL = "http://localhost:4000";
 
@@ -17,7 +17,7 @@ export default function Auth() {
 
   const dispatch = useDispatch();
 
-  const { status, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { status, error, isAuthenticated, user, provider } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,6 +59,8 @@ export default function Auth() {
   };
 
   const handleOAuthLogin = (provider) => {
+    // Store the intended provider in localStorage before redirection
+    localStorage.setItem("intended_provider", provider);
     window.location.href = `${BACKEND_URL}/auth/${provider}`;
   };
 
@@ -69,7 +71,39 @@ export default function Auth() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("auth_provider");
+    localStorage.removeItem("intended_provider");
     window.location.href = "/auth";
+  };
+  
+  // Get provider icon
+  const getProviderIcon = () => {
+    const currentProvider = provider || user?.provider || localStorage.getItem("auth_provider");
+    
+    switch(currentProvider) {
+      case 'google':
+        return <FaGoogle className="me-2" />;
+      case 'github':
+        return <FaGithub className="me-2" />;
+      default:
+        return <FaUser className="me-2" />;
+    }
+  };
+  
+  // Get provider name for display
+  const getProviderName = () => {
+    const currentProvider = provider || user?.provider || localStorage.getItem("auth_provider");
+    
+    switch(currentProvider) {
+      case 'google':
+        return 'Google';
+      case 'github':
+        return 'GitHub';
+      case 'local':
+        return 'Username/Password';
+      default:
+        return 'Unknown provider';
+    }
   };
   
   return (
@@ -78,9 +112,12 @@ export default function Auth() {
         <div className="col-md-6">
           {isLoggedIn ? (
             <div className="text-center">
-              <p className="mb-4">
+              <p className="mb-2">
                 Logged in as:{" "}
-                <span>{userData.username || localStorage.getItem("user")}</span>
+                <span className="fw-bold">{user?.username || JSON.parse(localStorage.getItem("user"))?.username}</span>
+              </p>
+              <p className="mb-4 d-flex align-items-center justify-content-center">
+                {getProviderIcon()} Via {getProviderName()}
               </p>
               <button
                 onClick={handleLogout}

@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://playground-029-backend.vercel.app",
+  baseURL: "http://localhost:4000",
   headers: {
     "Content-Type": "application/json",
   },
