@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./features/posts/Home";
 import Auth from "./features/auth/Auth";
+import OAuthCallback from "./components/OAuthCallback";
 import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
 
@@ -29,6 +30,10 @@ const routes = createBrowserRouter([
   {
     path: "/auth",
     element: <Auth />,
+  },
+  {
+    path: "/oauth-callback",
+    element: <OAuthCallback />,
   },
 ]);
 

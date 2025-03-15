@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "./authSlice";
+import { FaGoogle, FaGithub } from "react-icons/fa";
+
+const BACKEND_URL = "http://localhost:4000";
 
 export default function Auth() {
   const [userData, setUserData] = useState({
@@ -55,6 +58,10 @@ export default function Auth() {
     }
   };
 
+  const handleOAuthLogin = (provider) => {
+    window.location.href = `${BACKEND_URL}/auth/${provider}`;
+  };
+
   const isLoggedIn =
     isAuthenticated ||
     (localStorage.getItem("token") && localStorage.getItem("user"));
@@ -64,6 +71,7 @@ export default function Auth() {
     localStorage.removeItem("user");
     window.location.href = "/auth";
   };
+  
   return (
     <main className="container my-5">
       <div className="row justify-content-center">
@@ -81,10 +89,10 @@ export default function Auth() {
                 Logout
               </button>
               <button
-                onClick={() => navigate("/protected")}
+                onClick={() => navigate("/")}
                 className="btn btn-secondary w-100"
               >
-                Access Protected Route
+                Go to Home
               </button>
             </div>
           ) : (
@@ -180,7 +188,7 @@ export default function Auth() {
                     required
                   />
                 </div>
-                <div className="text-center">
+                <div className="d-grid">
                   <button
                     type="submit"
                     className="btn btn-primary"
@@ -194,6 +202,26 @@ export default function Auth() {
                   </button>
                 </div>
               </form>
+
+              <div className="mt-4 text-center">
+                <p className="text-muted mb-3">OR CONTINUE WITH</p>
+                <div className="d-flex justify-content-center gap-3">
+                  <button
+                    className="btn btn-outline-danger d-flex align-items-center justify-content-center"
+                    onClick={() => handleOAuthLogin("google")}
+                    style={{ width: "120px" }}
+                  >
+                    <FaGoogle className="me-2" /> Google
+                  </button>
+                  <button
+                    className="btn btn-outline-dark d-flex align-items-center justify-content-center"
+                    onClick={() => handleOAuthLogin("github")}
+                    style={{ width: "120px" }}
+                  >
+                    <FaGithub className="me-2" /> GitHub
+                  </button>
+                </div>
+              </div>
             </>
           )}
         </div>

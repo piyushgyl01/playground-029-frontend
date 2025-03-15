@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://playground-029-backend.vercel.app",
+  baseURL: "http://localhost:4000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -77,7 +77,7 @@ export const getCurrentUser = createAsyncThunk(
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       return rejectWithValue(
-        error.response?.data || { message: "Failed to get the curent user" }
+        error.response?.data || { message: "Failed to get the current user" }
       );
     }
   }
@@ -97,6 +97,12 @@ export const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    oauthLoginSuccess: (state, action) => {
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+      state.status = "succeeded";
+      state.error = null;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -153,5 +159,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, oauthLoginSuccess } = authSlice.actions;
 export default authSlice.reducer;
